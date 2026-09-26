@@ -1875,3 +1875,64 @@ tr:hover td { background: var(--surface2); }
 #rolesTable td:last-child {
   border-right: none;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════════════ */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0.75rem; left: 0.75rem;
+  z-index: 10000;
+  padding: 0.7rem 1.2rem;
+  background: var(--orange);
+  color: #fff;
+  font-weight: 700;
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+
+:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+#main:focus { outline: none; }
+
+/* Hero CTAs sit on the dark photo overlay (desktop) or the dark panel
+   (mobile) in both themes, so the ghost button needs light text. */
+.hero .hero-cta a { text-decoration: none; }
+.hero-btn-ghost {
+  color: #fff;
+  border-color: rgba(255,255,255,0.7);
+}
+.hero-btn-ghost:hover {
+  color: #fff;
+  border-color: var(--orange);
+  background: rgba(255,87,34,0.18);
+}
+.hero .hero-cta a:focus-visible { outline-color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-content,
+  .hero-eyebrow,
+  .hero-sub,
+  .hero-cta,
+  .hero-watermark,
+  .hero-scroll-hint::after {
+    animation: none !important;
+  }
+  .btn-primary:hover,
+  .btn-ghost:hover { transform: none; }
+}
