@@ -269,9 +269,6 @@
 </style>
 
 <script type="module">
-// ── add to auth import: signInAnonymously, signOut
-// ── add to firestore import: getDocs, query, collection, where
-
 window.toggleGuestLogin = function() {
   const s = document.getElementById('guestLoginSection');
   s.style.display = s.style.display === 'none' ? 'block' : 'none';
@@ -295,39 +292,32 @@ window.loginAsGuest = async function() {
 
   let signedIn = false;
   try {
-    // Need anon auth to read Firestore
+    // Guests get an anonymous account; redeemGuestOtp upgrades it
     guestFlowActive = true;
     await signInAnonymously(auth);
     signedIn = true;
 
-    const snap = await getDocs(query(collection(db, 'guestTokens'), where('otp', '==', otp)));
-
-    if (snap.empty) {
+    // The OTP is checked server-side (rate limited); on success the
+    // anonymous account gets guest claims, so refresh the ID token.
+    let tokenData;
+    try {
+      const res = await httpsCallable(functions, 'redeemGuestOtp')({ otp });
+      tokenData = res.data;
+    } catch (callErr) {
       await signOut(auth);
       guestFlowActive = false;
-      err.textContent = 'Invalid OTP. Please check with the admin.';
+      err.textContent = callErr.code === 'functions/resource-exhausted'
+        ? 'Too many attempts. Please wait a few minutes and try again.'
+        : 'Invalid or expired OTP. Please check with the admin.';
       err.style.display = 'block';
       btn.disabled = false; btn.textContent = 'Enter as Guest';
       return;
     }
-
-    const tokenDoc = snap.docs[0];
-    const tokenData = { id: tokenDoc.id, ...tokenDoc.data() };
-    const expiresAt = tokenData.expiresAt?.toDate
-      ? tokenData.expiresAt.toDate()
-      : new Date(tokenData.expiresAt);
-
-    if (new Date() > expiresAt) {
-      await signOut(auth);
-      guestFlowActive = false;
-      err.textContent = 'This OTP has expired. Ask the admin for a new one.';
-      err.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'Enter as Guest';
-      return;
-    }
+    await auth.currentUser.getIdToken(true);
+    const expiresAt = new Date(tokenData.expiresAt);
 
     localStorage.setItem('guestSession', JSON.stringify({
-      tokenId:    tokenData.id,
+      tokenId:    tokenData.tokenId,
       guestName:  tokenData.guestName,
       eventId:    tokenData.eventId,
       eventTitle: tokenData.eventTitle,
@@ -343,7 +333,7 @@ window.loginAsGuest = async function() {
     btn.disabled = false; btn.textContent = 'Enter as Guest';
   }
 };
-import { auth, db } from '../js/firebase-config.js';
+import { auth, db, functions, httpsCallable } from '../js/firebase-config.js';
 import { normalizeEvent } from '../js/event-status.js';
 
 import {

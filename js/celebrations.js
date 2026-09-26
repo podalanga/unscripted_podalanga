@@ -8,6 +8,8 @@
 // particle effects and removed from the DOM once the animation ends.
 // ============================================================
 
+import { escapeHtml } from './escape.js';
+
 function getCanvas() {
   let canvas = document.getElementById('celebrationCanvas');
   if (!canvas) {
@@ -138,8 +140,8 @@ export function showCelebToast({ type = 'badge', title, body, autoHideMs = 7000 
   el.innerHTML = `
     <div class="celeb-toast-icon"><i class="fa-solid ${icons[type] || 'fa-medal'}" style="color:var(--orange);"></i></div>
     <div style="flex:1;">
-      <div class="celeb-toast-title">${title}</div>
-      <div class="celeb-toast-body">${body}</div>
+      <div class="celeb-toast-title">${escapeHtml(title)}</div>
+      <div class="celeb-toast-body">${escapeHtml(body)}</div>
     </div>
     <button class="celeb-toast-close" aria-label="Dismiss">&times;</button>
   `;

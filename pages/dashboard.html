@@ -639,6 +639,7 @@ body.has-warning .sidebar nav { padding-bottom: 12rem; }
   
 <script type="module">
 import { auth, db, functions, httpsCallable } from '../js/firebase-config.js';
+import { escapeHtml as chatEscapeHtml, safeUrl as chatSafeUrl, jsAttr } from '../js/escape.js';
 import { onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   doc, getDoc, getDocs, collection, collectionGroup, query, orderBy, where,
@@ -986,7 +987,7 @@ if (hasChosenL3)
  
       html += `<div style="font-size:0.68rem;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;
         color:var(--text-light);padding:1.5rem 0 0.5rem;border-top:1px solid var(--border);margin-top:0.5rem;">
-        ${pathwayNames[levelKey] || levelKey}</div>`;
+        ${chatEscapeHtml(pathwayNames[levelKey] || levelKey)}</div>`;
  
       ranges.forEach((range, i) => {
   const isDone    = speechIndex > range.e;
@@ -1008,11 +1009,11 @@ if (hasChosenL3)
   window._projCache[cacheKey] = projData || range.label;
 
   html += `<div class="step-item ${stepClass}" style="${isPending ? 'opacity:0.38;' : ''}"
-    onclick="showSpeechDetails(window._projCache['${cacheKey}'], '${levelKey}', ${i + 1}, '${guideLink.replace(/'/g, "\\'")}')">
+    onclick="showSpeechDetails(window._projCache['${jsAttr(cacheKey)}'], '${jsAttr(levelKey)}', ${i + 1}, '${jsAttr(guideLink)}')">
     <div class="step-num ${numClass}">${icon}</div>
     <div class="step-info">
-      <h4>${projName}<span style="font-size:0.72rem;font-weight:600;color:var(--text-light);">${multiHint}</span></h4>
-      <p>${projDesc ? projDesc.substring(0, 80) + (projDesc.length > 80 ? '...' : '') : range.label}</p>
+      <h4>${chatEscapeHtml(projName)}<span style="font-size:0.72rem;font-weight:600;color:var(--text-light);">${multiHint}</span></h4>
+      <p>${chatEscapeHtml(projDesc ? projDesc.substring(0, 80) + (projDesc.length > 80 ? '...' : '') : range.label)}</p>
     </div>
     ${guideLink ? '<i class="fa-solid fa-book-open" style="color:var(--orange);margin-left:auto;font-size:0.9rem;flex-shrink:0;"></i>' : ''}
   </div>`;
@@ -1048,10 +1049,10 @@ if (hasChosenL3)
               onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
               <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;
                            color:var(--orange);margin-bottom:0.4rem;">L3K</div>
-              <div style="font-weight:800;font-size:0.97rem;margin-bottom:0.4rem;">${l3kName}</div>
-              <div style="font-size:0.78rem;color:var(--text-mid);margin-bottom:0.75rem;line-height:1.5;">${l3kDesc}</div>
+              <div style="font-weight:800;font-size:0.97rem;margin-bottom:0.4rem;">${chatEscapeHtml(l3kName)}</div>
+              <div style="font-size:0.78rem;color:var(--text-mid);margin-bottom:0.75rem;line-height:1.5;">${chatEscapeHtml(l3kDesc)}</div>
               <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:0.72rem;color:var(--text-light);">${l3kProjects} projects</span>
+                <span style="font-size:0.72rem;color:var(--text-light);">${chatEscapeHtml(l3kProjects)} projects</span>
                 <span style="font-size:0.75rem;font-weight:800;color:var(--orange);">Select</span>
               </div>
             </button>
@@ -1063,10 +1064,10 @@ if (hasChosenL3)
               onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
               <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;
                            color:var(--orange);margin-bottom:0.4rem;">L3H</div>
-              <div style="font-weight:800;font-size:0.97rem;margin-bottom:0.4rem;">${l3hName}</div>
-              <div style="font-size:0.78rem;color:var(--text-mid);margin-bottom:0.75rem;line-height:1.5;">${l3hDesc}</div>
+              <div style="font-weight:800;font-size:0.97rem;margin-bottom:0.4rem;">${chatEscapeHtml(l3hName)}</div>
+              <div style="font-size:0.78rem;color:var(--text-mid);margin-bottom:0.75rem;line-height:1.5;">${chatEscapeHtml(l3hDesc)}</div>
               <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:0.72rem;color:var(--text-light);">${l3hProjects} projects</span>
+                <span style="font-size:0.72rem;color:var(--text-light);">${chatEscapeHtml(l3hProjects)} projects</span>
                 <span style="font-size:0.75rem;font-weight:800;color:var(--orange);">Select</span>
               </div>
             </button>
@@ -1165,14 +1166,14 @@ function renderUpcomingRolesCard(upcoming) {
   const container = document.getElementById('upcomingRolesContainer');
   container.innerHTML = `
     <div style="margin-bottom:1rem;padding:1rem;background:var(--surface);border-radius:var(--radius-sm);">
-      <strong style="color:var(--orange);">${upcoming.title}</strong>
+      <strong style="color:var(--orange);">${chatEscapeHtml(upcoming.title)}</strong>
       <span style="font-size:0.75rem;color:var(--text-light);margin-left:0.75rem;">Upcoming roster</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.75rem;">
       ${upcoming.rolesDisplay.map(rd => `
         <div style="padding:0.85rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:0.7rem;font-weight:800;color:var(--text-light);text-transform:uppercase;">${rd.role}</span>
-          <span style="font-weight:700;color:var(--text);">${rd.name}</span>
+          <span style="font-size:0.7rem;font-weight:800;color:var(--text-light);text-transform:uppercase;">${chatEscapeHtml(rd.role)}</span>
+          <span style="font-weight:700;color:var(--text);">${chatEscapeHtml(rd.name)}</span>
         </div>`).join('')}
     </div>`;
 }
@@ -1204,8 +1205,8 @@ function renderMyUpcomingRoles(upcoming) {
     grid.innerHTML = myRoles.map(r => `
       <div class="badge-item earned">
         <div class="badge-icon"><i class="fa-solid fa-masks-theater" style="font-size:1.8rem;color:var(--orange);"></i></div>
-        <div class="badge-name">${r.role}</div>
-        <div class="badge-desc" style="color:var(--orange);font-weight:700;">${r.meet}</div>
+        <div class="badge-name">${chatEscapeHtml(r.role)}</div>
+        <div class="badge-desc" style="color:var(--orange);font-weight:700;">${chatEscapeHtml(r.meet)}</div>
       </div>`).join('');
   }
 }
@@ -1374,9 +1375,9 @@ function renderBadgeGrid(el, list) {
     const iconColor = b.earned ? 'var(--badge-c1)' : 'var(--text-light)';
     return `<div class="badge-item${tierClass}">
       ${!b.earned ? '<div class="badge-lock"><i class="fa-solid fa-lock"></i></div>' : ''}
-      <div class="badge-icon"><i class="fa-solid ${b.icon}" style="font-size:1.6rem;color:${iconColor};"></i></div>
-      <div class="badge-name">${b.name}</div>
-      <div class="badge-desc">${b.desc}</div>
+      <div class="badge-icon"><i class="fa-solid ${chatEscapeHtml(b.icon)}" style="font-size:1.6rem;color:${iconColor};"></i></div>
+      <div class="badge-name">${chatEscapeHtml(b.name)}</div>
+      <div class="badge-desc">${chatEscapeHtml(b.desc)}</div>
       ${b.earned && b.tier ? `<span class="badge-tier-tag">${b.tier}</span>` : ''}
     </div>`;
   }).join('');
@@ -1407,8 +1408,8 @@ async function loadAchievements() {
         const parts = r.split(' M-');
         return `<div class="badge-item completed">
           <div class="badge-icon"><i class="fa-solid fa-masks-theater" style="font-size:1.6rem;color:var(--badge-c1);"></i></div>
-          <div class="badge-name">${parts[0]}</div>
-          <div class="badge-desc" style="color:var(--badge-c2);font-weight:700;">${parts[1]||''}</div>
+          <div class="badge-name">${chatEscapeHtml(parts[0])}</div>
+          <div class="badge-desc" style="color:var(--badge-c2);font-weight:700;">${chatEscapeHtml(parts[1]||'')}</div>
         </div>`;
       }).join('');
     }
@@ -1421,8 +1422,8 @@ async function loadAchievements() {
         <div class="badge-item won">
           <div class="badge-ribbon">Winner</div>
           <div class="badge-icon"><i class="fa-solid fa-crown" style="font-size:1.6rem;color:var(--badge-c1);"></i></div>
-          <div class="badge-name">${wb.category}</div>
-          <div class="badge-desc" style="color:var(--badge-c2);font-weight:700;">${wb.meet}</div>
+          <div class="badge-name">${chatEscapeHtml(wb.category)}</div>
+          <div class="badge-desc" style="color:var(--badge-c2);font-weight:700;">${chatEscapeHtml(wb.meet)}</div>
         </div>`).join('');
     }
   } catch(e) { console.warn('Achievements error',e); }
@@ -1822,10 +1823,10 @@ function loadAttendance() {
                       : isPresent    ? 'att-present'
                       : 'att-absent';
       const label = isIneligible ? '-' : isUpcoming ? '?' : isPresent ? 'P' : 'A';
-      return `<div class="att-cell ${cellClass}" title="${e.title||''}"
+      return `<div class="att-cell ${cellClass}" title="${chatEscapeHtml(e.title||'')}"
         style="${isIneligible?'opacity:0.45;background:var(--surface2);border-color:var(--border);':isUpcoming?'opacity:0.5;background:var(--surface2);border-style:dashed;':''}">
-        <div class="day-num">${label}</div>
-        <div style="font-size:0.6rem;">${dateStr}</div>
+        <div class="day-num">${chatEscapeHtml(label)}</div>
+        <div style="font-size:0.6rem;">${chatEscapeHtml(dateStr)}</div>
       </div>`;
     }).join('');
   } catch(e) { console.warn('Attendance error', e); }
@@ -1883,7 +1884,7 @@ async function loadGallery() {
       img.onclick = () => {
         const lb = document.createElement('div');
         lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);z-index:3000;display:flex;align-items:center;justify-content:center;cursor:pointer;';
-        lb.innerHTML = `<img src="${p.url}" style="max-width:90vw;max-height:90vh;border-radius:12px;"/>`;
+        lb.innerHTML = `<img src="${chatEscapeHtml(chatSafeUrl(p.url))}" style="max-width:90vw;max-height:90vh;border-radius:12px;"/>`;
         lb.onclick = () => lb.remove();
         document.body.appendChild(lb);
       };
@@ -2267,7 +2268,7 @@ window.loadExistingFeedback = async function() {
 
     const comments = feedbacks.filter(f=>f.comment).map(f=>`
       <div style="padding:1rem;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:0.75rem;font-size:0.9rem;color:var(--text);">
-        ${f.comment}
+        ${chatEscapeHtml(f.comment)}
       </div>`).join('');
     document.getElementById('fbComments').innerHTML = comments ? `<h4 style="margin-bottom:1rem;">Written Feedback</h4>${comments}` : '';
   } catch(e) { console.warn('Load feedback error',e); }
@@ -2360,7 +2361,7 @@ async function loadVoting() {
       container.innerHTML = `<div class="card" style="text-align:center;padding:3rem;">
         <i class="fa-solid fa-circle-check" style="font-size:2.5rem;color:#4CAF50;margin-bottom:1rem;display:block;"></i>
         <h3 style="font-family:var(--font-body);color:#2e7d32;">You Have Already Voted</h3>
-        <p style="color:var(--text-mid);">Your anonymous vote for <strong>${sessionData.meetTitle||'this meeting'}</strong> has been recorded.</p>
+        <p style="color:var(--text-mid);">Your anonymous vote for <strong>${chatEscapeHtml(sessionData.meetTitle||'this meeting')}</strong> has been recorded.</p>
       </div>`; return;
     }
 
@@ -2375,22 +2376,22 @@ async function loadVoting() {
     const voteSelections = {};
     container.innerHTML = `
       <div class="card" style="margin-bottom:1.5rem;border:1px solid rgba(255,87,34,0.2);background:var(--orange-light);">
-        <h3 style="margin:0;display:flex;align-items:center;gap:0.6rem;"><i class="fa-solid fa-check-to-slot" style="color:var(--orange);"></i> ${sessionData.meetTitle||'Meeting'}: Voting Open</h3>
+        <h3 style="margin:0;display:flex;align-items:center;gap:0.6rem;"><i class="fa-solid fa-check-to-slot" style="color:var(--orange);"></i> ${chatEscapeHtml(sessionData.meetTitle||'Meeting')}: Voting Open</h3>
         <p style="margin:0.4rem 0 0;font-size:0.85rem;color:var(--text-mid);">Your vote is anonymous and non-traceable.</p>
       </div>
       <form id="voteForm">
         ${categories.map(cat => `
           <div class="vote-category">
-            <h4>${cat.label}</h4>
+            <h4>${chatEscapeHtml(cat.label)}</h4>
             <div class="vote-options">
               ${cat.candidates.map(c => `
                 <label class="vote-option" onclick="this.classList.add('selected');this.closest('.vote-options').querySelectorAll('.vote-option:not(label:has(input:checked))').forEach(el=>el.classList.remove('selected'));">
-                  <input type="radio" name="${cat.key}" value="${c.uid||c.name}" style="pointer-events:none;" />
-                  <span>${c.name}</span>
+                  <input type="radio" name="${cat.key}" value="${chatEscapeHtml(c.uid||c.name)}" style="pointer-events:none;" />
+                  <span>${chatEscapeHtml(c.name)}</span>
                 </label>`).join('')}
             </div>
           </div>`).join('')}
-        <button type="button" class="btn-primary" onclick="submitVote('${sessionId}')" style="width:100%;margin-top:1rem;padding:1rem;">Submit My Vote</button>
+        <button type="button" class="btn-primary" onclick="submitVote('${jsAttr(sessionId)}')" style="width:100%;margin-top:1rem;padding:1rem;">Submit My Vote</button>
         <p style="text-align:center;font-size:0.8rem;color:var(--text-light);margin-top:0.75rem;">Your identity will not be stored with your vote.</p>
       </form>`;
   } catch(e) { console.warn('Voting error',e); container.innerHTML = '<div class="card"><p style="color:var(--text-mid);">Could not load voting session.</p></div>'; }
@@ -2422,26 +2423,17 @@ window.submitVote = async function(sessionId) {
     const choices = {};
     radios.forEach(r => { choices[r.name] = r.value; });
 
-    // Deterministic, per-voter-per-session ID — resubmits OVERWRITE instead of duplicating.
-    const voteDocId = await hashVoterSession(currentUid, sessionId);
-
-    await setDoc(doc(db,'votes',voteDocId), { sessionId, choices, updatedAt: serverTimestamp() });
-    await setDoc(doc(db,'voteRecords',currentUid+'_'+sessionId), { sessionId, voterUid: currentUid, createdAt: serverTimestamp() });
+    // castVote checks eligibility and records exactly one anonymous vote.
+    await httpsCallable(functions, 'castVote')({ sessionId, choices });
     loadVoting();
   } catch(e) {
-    alert('Failed to submit vote. Please try again.');
+    alert(e.code === 'functions/already-exists' ? 'You have already voted in this session.' : 'Failed to submit vote. Please try again.');
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit My Vote'; }
   } finally {
     // Always release the lock, whether we succeeded, failed, or returned early on validation
     _voteSubmissionInProgress = false;
   }
 };
-
-async function hashVoterSession(uid, sessionId) {
-  const data = new TextEncoder().encode(uid + '_' + sessionId);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2,'0')).join('');
-}
 
 // ── ANALYSIS CHARTS ───────────────────────────────────────
 let Chart = null;
@@ -2673,7 +2665,7 @@ function renderCharts(avgScores, eventsCache, feedbacks) {
     const comments = fbs.filter(f=>f.comment?.trim());
     return `<div style="padding:1.1rem 1.25rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:1rem;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
-        <strong style="font-size:0.95rem;">${evTitle}</strong>
+        <strong style="font-size:0.95rem;">${chatEscapeHtml(evTitle)}</strong>
         <span style="font-size:1.2rem;font-weight:800;color:var(--orange);">${avg}<span style="font-size:0.75rem;font-weight:600;color:var(--text-light);">/5</span></span>
       </div>
       <div style="font-size:0.78rem;color:var(--text-light);margin-bottom:0.75rem;">${fbs.length} response${fbs.length!==1?'s':''}</div>
@@ -2683,7 +2675,7 @@ function renderCharts(avgScores, eventsCache, feedbacks) {
           <span style="font-weight:700;color:${catAvgs[i]==='-'?'var(--text-light)':'var(--text)'};">${catAvgs[i]}</span>
         </div>`).join('')}
       </div>
-      ${comments.map(f=>`<div style="padding:0.75rem;background:var(--surface2);border-radius:var(--radius-sm);margin-top:0.5rem;font-size:0.85rem;color:var(--text-mid);font-style:italic;">"${f.comment}"</div>`).join('')}
+      ${comments.map(f=>`<div style="padding:0.75rem;background:var(--surface2);border-radius:var(--radius-sm);margin-top:0.5rem;font-size:0.85rem;color:var(--text-mid);font-style:italic;">"${chatEscapeHtml(f.comment)}"</div>`).join('')}
     </div>`;
   }).join('');
 }
@@ -2712,14 +2704,14 @@ if (typeof speech==='object' && speech.purpose) {
   const guideBtn = document.getElementById('modalGuideBtn');
   const effectiveLink = (typeof speech==='object'&&speech.guideLink) ? speech.guideLink : guideLink;
   if (effectiveLink) {
-    guideBtn.href = effectiveLink; guideBtn.style.display='inline-flex';
+    guideBtn.href = chatSafeUrl(effectiveLink) || '#'; guideBtn.style.display='inline-flex';
   } else { guideBtn.style.display='none'; }
 
   const filesWrap = document.getElementById('modalFiles');
   filesWrap.innerHTML = '';
   if (typeof speech==='object'&&speech.files?.length) {
     speech.files.forEach(f => {
-      filesWrap.innerHTML += `<a href="#" class="file-badge" onclick="event.preventDefault()"><i class="fa-solid fa-file-pdf"></i> ${f}</a>`;
+      filesWrap.innerHTML += `<a href="#" class="file-badge" onclick="event.preventDefault()"><i class="fa-solid fa-file-pdf"></i> ${chatEscapeHtml(f)}</a>`;
     });
   }
   modal.style.display = 'flex';
@@ -2897,27 +2889,8 @@ const CHAT_EMOJI_LIST = [
 
 function isChatAdmin() { return !!(userData && ['admin','core'].includes(userData.role)); }
 
-function chatEscapeHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str == null ? '' : String(str);
-  // textContent→innerHTML escapes & < > but leaves quotes untouched, which
-  // breaks attribute values like alt="..." or title="..." open to injection
-  // (see security finding S5). Escape those explicitly too.
-  return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
 function chatEscapeRegex(str) { return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
-// Only allows http(s)/mailto/blob/data-image URLs through to href/src, so a
-// chat sender/profile field can never carry a javascript: URL or (for
-// avatars) break out of the src="..." attribute — see security findings S1/S6.
-function chatSafeUrl(url) {
-  if (!url) return '';
-  try {
-    const u = new URL(String(url), window.location.href);
-    if (['http:', 'https:', 'mailto:', 'blob:'].includes(u.protocol)) return u.href;
-  } catch (_) { /* not a valid absolute/relative URL */ }
-  return '';
-}
 function chatToDate(ts) {
   if (!ts) return new Date();
   return ts.toDate ? ts.toDate() : new Date(ts);
@@ -3500,11 +3473,13 @@ function renderChatBubble(msg) {
   const safeSenderPhoto = chatSafeUrl(msg.senderPhoto);
   const avatar = safeSenderPhoto
     ? `<img src="${chatEscapeHtml(safeSenderPhoto)}" alt="${chatEscapeHtml(msg.senderName||'')}" />`
-    : initials;
+    : chatEscapeHtml(initials);
   const timeLabel = chatIstTime(chatToDate(msg.createdAt));
   const dayLabel = chatIstDayLabel(chatToDate(msg.createdAt));
-  const safeName = chatEscapeHtml(msg.senderName||'Member').replace(/'/g,"\\'");
-  const safeSnippet = chatEscapeHtml((msg.text||'').slice(0,120)).replace(/'/g,"\\'");
+  // jsAttr: these go inside onclick="...('...')", where HTML entities are
+  // decoded BEFORE the JS runs, so plain HTML escaping is not enough.
+  const safeName = jsAttr(msg.senderName||'Member');
+  const safeSnippet = jsAttr((msg.text||'').slice(0,120));
 
   // req 5: soft-deleted placeholder — no text, reactions, or further actions.
   if (msg.deleted) {
@@ -3525,7 +3500,7 @@ function renderChatBubble(msg) {
   }
 
   const replyHtml = msg.replyTo
-    ? `<div class="chat-reply-tag" onclick="scrollToChatMessage('${msg.replyTo.id}')">
+    ? `<div class="chat-reply-tag" onclick="scrollToChatMessage('${jsAttr(msg.replyTo.id)}')">
         <i class="fa-solid fa-reply"></i> <strong>${chatEscapeHtml(msg.replyTo.name)}</strong>: ${chatEscapeHtml(msg.replyTo.text)}
       </div>`
     : '';
@@ -3820,8 +3795,8 @@ function chatUpdateMentionDropdown() {
   box.innerHTML = matches.map(u => {
     const initials = (u.name||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
     const inactiveTag = u.isActive === false ? '<span class="chat-mention-inactive">inactive</span>' : '';
-    return `<button type="button" class="chat-mention-item" onclick="pickChatMention('${u.id}')">
-      <span class="chat-mention-avatar">${u.photoUrl ? `<img src="${u.photoUrl}"/>` : initials}</span>
+    return `<button type="button" class="chat-mention-item" onclick="pickChatMention('${jsAttr(u.id)}')">
+      <span class="chat-mention-avatar">${chatSafeUrl(u.photoUrl) ? `<img src="${chatEscapeHtml(chatSafeUrl(u.photoUrl))}"/>` : chatEscapeHtml(initials)}</span>
       <span class="chat-mention-name">${chatEscapeHtml(u.name||'Member')}</span>
       ${inactiveTag}
     </button>`;

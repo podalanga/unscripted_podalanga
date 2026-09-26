@@ -1118,7 +1118,7 @@ function populateGuestEventSelect() {
   const sel = document.getElementById('guestEventSelect');
   if (!sel) return;
   sel.innerHTML = '<option value="">-- Select an event --</option>' +
-    allEventsCache.map(e => `<option value="${e.id}" data-title="${e.title}">${e.title}</option>`).join('');
+    allEventsCache.map(e => `<option value="${escapeHtml(e.id)}" data-title="${escapeHtml(e.title)}">${escapeHtml(e.title)}</option>`).join('');
 }
 
 // req 2: debounce lock — same synchronous-guard pattern as _voteSubmissionInProgress
@@ -1177,9 +1177,9 @@ function renderGuestTokenRow(t, now) {
             border-radius:var(--radius-sm);margin-bottom:0.5rem;
             display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
     <div>
-      <div style="font-weight:700;">${t.guestName}</div>
+      <div style="font-weight:700;">${escapeHtml(t.guestName)}</div>
       <div style="font-size:0.72rem;color:var(--text-light);">
-        ${t.eventTitle}&nbsp;·&nbsp;OTP:&nbsp;<strong style="letter-spacing:0.15em;font-family:monospace;">${t.otp}</strong>
+        ${escapeHtml(t.eventTitle)}&nbsp;·&nbsp;OTP:&nbsp;<strong style="letter-spacing:0.15em;font-family:monospace;">${escapeHtml(t.otp)}</strong>
       </div>
     </div>
     <span style="padding:3px 10px;border-radius:100px;font-size:0.68rem;font-weight:800;
@@ -1227,7 +1227,7 @@ async function loadGuestTokensList() {
     container.innerHTML = html;
     filterGuestTokens();   // keep the current search applied after a refresh
   } catch(e) {
-    container.innerHTML = `<p style="color:var(--text-mid);">Error: ${e.message}</p>`;
+    container.innerHTML = `<p style="color:var(--text-mid);">Error: ${escapeHtml(e.message)}</p>`;
   }
 }
 
@@ -1305,8 +1305,8 @@ async function loadGuestExperienceFeedback() {
         <div style="display:flex;justify-content:space-between;align-items:center;
                     flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
           <div>
-            <div style="font-weight:700;">${f.guestName}</div>
-            <div style="font-size:0.72rem;color:var(--text-light);">${f.eventTitle} · ${dateStr}</div>
+            <div style="font-weight:700;">${escapeHtml(f.guestName)}</div>
+            <div style="font-size:0.72rem;color:var(--text-light);">${escapeHtml(f.eventTitle)} · ${escapeHtml(dateStr)}</div>
           </div>
           <span style="font-size:1.2rem;font-weight:800;color:var(--orange);">
             ${avg}<span style="font-size:0.72rem;color:var(--text-light);">/5</span>
@@ -1333,11 +1333,11 @@ async function loadGuestExperienceFeedback() {
         </div>
         ${f.comment ? `<div style="padding:0.6rem 0.75rem;background:var(--surface2);
             border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text-mid);
-            font-style:italic;">"${f.comment}"</div>` : ''}
+            font-style:italic;">"${escapeHtml(f.comment)}"</div>` : ''}
       </div>`;
     }).join('');
   } catch(e) {
-    container.innerHTML = `<p style="color:var(--text-mid);">Error: ${e.message}</p>`;
+    container.innerHTML = `<p style="color:var(--text-mid);">Error: ${escapeHtml(e.message)}</p>`;
   }
 }
 import { auth, db, storage } from '../js/firebase-config.js';
@@ -1348,27 +1348,16 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import {
-  runDualApprovalAction, requestOrApproveServerAction, watchPendingActions, tripleConfirm
+  runDualApprovalAction, requestOrApproveServerAction, watchPendingActions, tripleConfirm, resetSettingsDoc
 } from '../js/danger-actions.js';
 import { normalizeEvent, resolveEventType } from '../js/event-status.js';
+import { escapeHtml, safeUrl, attrUrl, jsAttr } from '../js/escape.js';
 
 // Escapes & < > " ' for safe interpolation into innerHTML (see security
 // findings S1/S3 — profile/event fields are user- or admin-editable and were
 // previously interpolated raw).
-function adminEscapeHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str == null ? '' : String(str);
-  return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-// Only allows http(s)/mailto/blob URLs through to href/src (see S1/S6).
-function adminSafeUrl(url) {
-  if (!url) return '';
-  try {
-    const u = new URL(String(url), window.location.href);
-    if (['http:', 'https:', 'mailto:', 'blob:'].includes(u.protocol)) return u.href;
-  } catch (_) { /* not a valid absolute/relative URL */ }
-  return '';
-}
+const adminEscapeHtml = escapeHtml;
+const adminSafeUrl = safeUrl;
 
 // ── SERVER CLOCK ────────────────────────────────────────
 // "Last Login" values are stamped with the SERVER's time (serverTimestamp()). If
@@ -1643,7 +1632,7 @@ document.getElementById('insightAvgAtt').textContent = avgAtt + '%';
     const medal = ['1.','2.','3.'];
     document.getElementById('insightTopContributors').innerHTML = top3.length
       ? top3.map((r,i) => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.55rem 0;${i<top3.length-1?'border-bottom:1px solid var(--border);':''}">
-          <span style="font-weight:700;">${medal[i]||''} ${r.name}</span>
+          <span style="font-weight:700;">${medal[i]||''} ${escapeHtml(r.name)}</span>
           <span style="font-size:0.82rem;color:var(--text-mid);">${r.points||0} pts &middot; ${r.totalRoles||0} roles</span>
         </div>`).join('')
       : '<p style="color:var(--text-mid);">No role activity yet.</p>';
@@ -1784,7 +1773,7 @@ function renderUserTable() {
       const status = isIneligible ? 'ineligible' : (isPresent ? 'present' : 'absent');
       const s = chipStyles[status];
       const eTitle = (e.title || 'Event').replace(/"/g,'&quot;');
-      return `<span title="${eTitle}: ${s.label}"
+      return `<span title="${escapeHtml(eTitle)}: ${escapeHtml(s.label)}"
         style="width:18px;height:18px;border-radius:4px;flex-shrink:0;display:inline-flex;
                align-items:center;justify-content:center;color:#fff;font-size:0.6rem;background:${s.bg};">
         ${s.icon}
@@ -1813,20 +1802,20 @@ function renderUserTable() {
 
     const html = `<tr>
       <td style="padding-left:1.5rem;">
-        <div style="font-weight:700;">${u.name}</div>
-        <div style="font-size:0.72rem;color:var(--text-light);font-weight:700;text-transform:uppercase;">${u.email || ''}</div>
-        ${u.personalEmail ? `<div style="font-size:0.68rem;color:var(--text-light);"><i class="fa-solid fa-envelope" style="margin-right:3px;"></i>${u.personalEmail}</div>` : ''}
+        <div style="font-weight:700;">${escapeHtml(u.name)}</div>
+        <div style="font-size:0.72rem;color:var(--text-light);font-weight:700;text-transform:uppercase;">${escapeHtml(u.email || '')}</div>
+        ${u.personalEmail ? `<div style="font-size:0.68rem;color:var(--text-light);"><i class="fa-solid fa-envelope" style="margin-right:3px;"></i>${escapeHtml(u.personalEmail)}</div>` : ''}
         ${joinedSinceStr ? `<div style="font-size:0.68rem;color:var(--text-light);margin-top:2px;"><i class="fa-solid fa-calendar-plus" style="margin-right:3px;"></i>Joined ${joinedSinceStr}</div>` : ''}
         ${u.role === 'admin' || u.role === 'core'
-          ? `<span class="badge-admin" style="margin-top:4px;display:inline-block;">${u.role}</span>`
+          ? `<span class="badge-admin" style="margin-top:4px;display:inline-block;">${escapeHtml(u.role)}</span>`
           : ''}
       </td>
       <td>
         <span style="font-weight:800;color:var(--orange);background:var(--orange-light);padding:3px 10px;border-radius:6px;">
-          ${u.pathway || 'L1P1'}
+          ${escapeHtml(u.pathway || 'L1P1')}
         </span>
       </td>
-      <td><span style="font-size:0.88rem;">${mentorName}</span></td>
+      <td><span style="font-size:0.88rem;">${escapeHtml(mentorName)}</span></td>
       <td>
         <div style="font-weight:800;">${pct}%</div>
         <div style="font-size:0.72rem;color:var(--text-light);">${presentCount} / ${totalMeets} eligible meets</div>
@@ -1851,8 +1840,8 @@ function renderUserTable() {
       <td>${lastLoginHtml}</td>
       <td style="padding-right:1.5rem;">
         <div class="action-row">
-          <button class="btn-primary btn-sm" onclick="openEditModal('${u.id}')">Edit</button>
-          <button class="btn-danger btn-sm" onclick="deleteUser('${u.id}','${u.name?.replace(/'/g, "\\'")}')">Delete</button>
+          <button class="btn-primary btn-sm" onclick="openEditModal('${jsAttr(u.id)}')">Edit</button>
+          <button class="btn-danger btn-sm" onclick="deleteUser('${jsAttr(u.id)}','${jsAttr(u.name)}')">Delete</button>
         </div>
       </td>
     </tr>`;
@@ -1875,7 +1864,7 @@ function populateUserFilterOptions() {
     const sel = document.getElementById(id); if (!sel) return;
     const keep = sel.value;
     sel.innerHTML = `<option value="">${firstLabel}</option>` +
-      opts.map(([v, l]) => `<option value="${String(v).replace(/"/g,'&quot;')}">${l}</option>`).join('');
+      opts.map(([v, l]) => `<option value="${String(v).replace(/"/g,'&quot;')}">${escapeHtml(l)}</option>`).join('');
     if ([...sel.options].some(o => o.value === keep)) sel.value = keep;
   };
   const numCmp = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
@@ -2007,9 +1996,10 @@ window.clearLeaderboard = async () => {
   await runDualApprovalAction('del_settings_leaderboard',
     'Clear the leaderboard? Totals will reset to zero. No data is deleted. Only the leaderboard display resets from this point forward.', me,
     { collection: 'settings', docId: 'leaderboard' },
-    async () => {
-      await setDoc(doc(db, 'settings', 'leaderboard'), { resetAt: serverTimestamp() }, { merge: true });
+    async (pendingRef) => {
+      await resetSettingsDoc('leaderboard', pendingRef);
       loadMeetRoles();
+      return 'executed';
     });
 };
 
@@ -2055,7 +2045,7 @@ window.closeModal = () => document.getElementById('editModal').classList.remove(
 function populateMentorDropdown() {
   document.getElementById('editMentor').innerHTML =
   '<option value="">(None)</option>' + allUsers.map(u =>
-    `<option value="${u.id}">${u.name}${u.isActive === false ? ' (inactive)' : ''}</option>`
+    `<option value="${escapeHtml(u.id)}">${escapeHtml(u.name)}${u.isActive === false ? ' (inactive)' : ''}</option>`
   ).join('');
 }
 
@@ -2148,8 +2138,8 @@ window.previewExcel = async function(input) {
     // Preview table
     if (!excelData.length) return;
     const cols = Object.keys(excelData[0]);
-    const thead = `<thead><tr>${cols.map(c=>`<th style="padding:0.5rem 0.75rem;background:var(--orange);color:#fff;font-size:0.7rem;font-weight:800;text-transform:uppercase;">${c}</th>`).join('')}</tr></thead>`;
-    const tbody = `<tbody>${excelData.slice(0,8).map(row=>`<tr>${cols.map(c=>`<td style="padding:0.5rem 0.75rem;">${row[c]||''}</td>`).join('')}</tr>`).join('')}</tbody>`;
+    const thead = `<thead><tr>${cols.map(c=>`<th style="padding:0.5rem 0.75rem;background:var(--orange);color:#fff;font-size:0.7rem;font-weight:800;text-transform:uppercase;">${escapeHtml(c)}</th>`).join('')}</tr></thead>`;
+    const tbody = `<tbody>${excelData.slice(0,8).map(row=>`<tr>${cols.map(c=>`<td style="padding:0.5rem 0.75rem;">${escapeHtml(row[c]||'')}</td>`).join('')}</tr>`).join('')}</tbody>`;
     document.getElementById('excelPreviewTable').innerHTML = thead+tbody;
     document.getElementById('excelPreview').style.display = 'block';
     document.getElementById('excelUploadBtn').style.display = 'block';
@@ -2217,7 +2207,7 @@ window.importExcelToFirestore = async function() {
 function populateMemberPhotoSelect() {
   const sel = document.getElementById('photoMemberSelect');
   sel.innerHTML = '<option value="">-- Select Member --</option>' +
-    allUsers.filter(u=>u.isActive!==false).map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
+    allUsers.filter(u=>u.isActive!==false).map(u=>`<option value="${escapeHtml(u.id)}">${escapeHtml(u.name)}</option>`).join('');
 }
 
 window.previewMemberPhoto = function(input) {
@@ -2334,23 +2324,23 @@ function renderAttendanceChecklist() {
   activeUsers.forEach(u => { attState[u.id] = 'ineligible'; });
  
   list.innerHTML = activeUsers.map(u => `
-    <div id="attrow-${u.id}" style="display:flex;align-items:center;justify-content:space-between;
+    <div id="attrow-${escapeHtml(u.id)}" style="display:flex;align-items:center;justify-content:space-between;
       padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);gap:1rem;flex-wrap:wrap;">
       <div>
-        <div style="font-weight:700;">${u.name}</div>
-        <div style="font-size:0.72rem;color:var(--text-light);">${u.email||''}</div>
+        <div style="font-weight:700;">${escapeHtml(u.name)}</div>
+        <div style="font-size:0.72rem;color:var(--text-light);">${escapeHtml(u.email||'')}</div>
       </div>
       <div style="display:flex;gap:0.4rem;flex-shrink:0;">
-        <button onclick="setAttState('${u.id}','present')"
-          id="attbtn-${u.id}-present"
+        <button onclick="setAttState('${jsAttr(u.id)}','present')"
+          id="attbtn-${escapeHtml(u.id)}-present"
           style="padding:0.35rem 0.85rem;border-radius:6px;border:1.5px solid #ccc;background:#fff;
                  cursor:pointer;font-size:0.75rem;font-weight:800;color:#888;transition:0.15s;">P</button>
-        <button onclick="setAttState('${u.id}','absent')"
-          id="attbtn-${u.id}-absent"
+        <button onclick="setAttState('${jsAttr(u.id)}','absent')"
+          id="attbtn-${escapeHtml(u.id)}-absent"
           style="padding:0.35rem 0.85rem;border-radius:6px;border:1.5px solid #ccc;background:#fff;
                  cursor:pointer;font-size:0.75rem;font-weight:800;color:#888;transition:0.15s;">A</button>
-        <button onclick="setAttState('${u.id}','ineligible')"
-          id="attbtn-${u.id}-ineligible"
+        <button onclick="setAttState('${jsAttr(u.id)}','ineligible')"
+          id="attbtn-${escapeHtml(u.id)}-ineligible"
           style="padding:0.35rem 0.85rem;border-radius:6px;border:1.5px solid #9e9e9e;
                  background:rgba(158,158,158,0.15);cursor:pointer;font-size:0.75rem;font-weight:800;
                  color:#555;transition:0.15s;">-</button>
@@ -2438,9 +2428,9 @@ async function loadEvents() {
         const dObj = e.date.toDate?e.date.toDate():new Date(e.date);
         displayDate = dObj.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
       }
-      optionsHtml += `<option value="${id}">${e.title} (${displayDate})</option>`;
+      optionsHtml += `<option value="${escapeHtml(id)}">${escapeHtml(e.title)} (${escapeHtml(displayDate)})</option>`;
       const galleryCell = e.galleryLink
-        ? `<a href="${e.galleryLink}" target="_blank" class="btn-outline btn-sm" style="font-size:0.72rem;">View</a>`
+        ? `<a href="${attrUrl(e.galleryLink)}" target="_blank" class="btn-outline btn-sm" style="font-size:0.72rem;">View</a>`
         : '<span style="color:var(--text-light);font-size:0.78rem;">-</span>';
       // Description (same text the member dashboard shows under the event title).
       // Escaped so free text containing < > & can't break the table.
@@ -2452,7 +2442,7 @@ async function loadEvents() {
       const videoCell = videoCount
         ? `<div style="display:flex;flex-direction:column;gap:0.25rem;">
             ${(e.eventVideos||[]).map((v,i) =>
-              `<a href="${v.url}" target="_blank" rel="noopener"
+              `<a href="${attrUrl(v.url)}" target="_blank" rel="noopener"
                 style="font-size:0.75rem;color:var(--orange);font-weight:700;white-space:nowrap;">
                 <i class="fa-solid fa-play" style="font-size:0.6rem;"></i> ${v.title || 'Video '+(i+1)}
               </a>`).join('')}
@@ -2461,8 +2451,8 @@ async function loadEvents() {
       tbody.innerHTML += `
         <tr>
           <td style="padding-left:1.5rem;">
-            <div style="font-weight:700;">${e.title}</div>
-            <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">${displayDate}</div>
+            <div style="font-weight:700;">${escapeHtml(e.title)}</div>
+            <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">${escapeHtml(displayDate)}</div>
             ${descHtml}
           </td>
           <td>
@@ -2471,12 +2461,12 @@ async function loadEvents() {
             </span>
           </td>
           <td>${galleryCell}</td>
-          <td>${e.docLink ? `<a href="${e.docLink}" target="_blank" class="btn-outline btn-sm" style="font-size:0.72rem;">View</a>` : '<span style="color:var(--text-light);font-size:0.78rem;">-</span>'}</td>
+          <td>${e.docLink ? `<a href="${attrUrl(e.docLink)}" target="_blank" class="btn-outline btn-sm" style="font-size:0.72rem;">View</a>` : '<span style="color:var(--text-light);font-size:0.78rem;">-</span>'}</td>
           <td>${videoCell}</td>
           <td style="padding-right:1.5rem;">
             <div class="action-row">
-              <button class="btn-outline btn-sm" onclick="editEvent('${id}')">Edit</button>
-              <button class="btn-danger btn-sm" onclick="deleteEvent('${id}')">Delete</button>
+              <button class="btn-outline btn-sm" onclick="editEvent('${jsAttr(id)}')">Edit</button>
+              <button class="btn-danger btn-sm" onclick="deleteEvent('${jsAttr(id)}')">Delete</button>
             </div>
           </td>
         </tr>`;
@@ -2511,8 +2501,8 @@ window.editEvent = async (id) => {
     (e.eventVideos||[]).forEach(v => {
       const row = document.createElement('div');
       row.style.cssText='display:flex;gap:0.5rem;align-items:center;';
-      row.innerHTML = `<input type="url" class="ev-video-url" value="${v.url||''}" placeholder="YouTube URL" style="flex:1;" />
-        <input type="text" class="ev-video-title" value="${v.title||''}" placeholder="Video title" style="width:200px;" />
+      row.innerHTML = `<input type="url" class="ev-video-url" value="${escapeHtml(v.url||'')}" placeholder="YouTube URL" style="flex:1;" />
+        <input type="text" class="ev-video-title" value="${escapeHtml(v.title||'')}" placeholder="Video title" style="width:200px;" />
         <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-light);cursor:pointer;font-size:1rem;padding:0.4rem;">&times;</button>`;
       videoContainer.appendChild(row);
     });
@@ -2820,7 +2810,7 @@ const ROLE_KEYS = [
 function renderRoleDropdowns() {
   const container = document.getElementById('rolesSelectorsContainer');
   let opts = '<option value="">-- Unassigned --</option>';
-  allUsers.filter(u => u.isActive !== false).forEach(u => { opts += `<option value="${u.id}">${u.name}</option>`; });
+  allUsers.filter(u => u.isActive !== false).forEach(u => { opts += `<option value="${escapeHtml(u.id)}">${escapeHtml(u.name)}</option>`; });
  
   let html = '<div class="roles-grid" style="margin-bottom:1.5rem;">';
   ROLE_KEYS.forEach(r => {
@@ -3004,7 +2994,7 @@ async function loadMeetRoles() {
   rolesDataList = rows.map(r => ({ ...r, points: r._pts || '' }));
 
   tbody.innerHTML = rows.map(r => `<tr style="border-bottom:1px solid var(--border);">
-    <td style="padding:0.9rem;font-weight:700;">${r.name}</td>
+    <td style="padding:0.9rem;font-weight:700;">${escapeHtml(r.name)}</td>
     ${[r.hom, r.speaker, r.evaluator, r.ttm, r.tte, r.ge, r.timer, r.tt,
        r.listener, r.grammarian, r.attendance, r.mom, r._pts || '', r.totalRoles]
       .map(v => `<td style="padding:0.75rem;text-align:center;">${v}</td>`).join('')}
@@ -3037,12 +3027,12 @@ function renderUpcomingRoles() {
     container.innerHTML='<p style="color:var(--text-mid);">No roles assigned for next meet.</p>'; return;
   }
   container.innerHTML = `<div style="margin-bottom:1rem;padding:1rem;background:var(--orange-light);border-radius:var(--radius-sm);border:1px solid rgba(255,87,34,0.15);">
-    <strong style="color:var(--orange);">${upcoming.title}</strong></div>
+    <strong style="color:var(--orange);">${escapeHtml(upcoming.title)}</strong></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.75rem;">
       ${upcoming.rolesDisplay.map(rd=>`
         <div style="padding:0.85rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:0.7rem;font-weight:800;color:var(--text-light);text-transform:uppercase;">${rd.role}</span>
-          <span style="font-weight:700;">${rd.name}</span>
+          <span style="font-size:0.7rem;font-weight:800;color:var(--text-light);text-transform:uppercase;">${escapeHtml(rd.role)}</span>
+          <span style="font-weight:700;">${escapeHtml(rd.name)}</span>
         </div>`).join('')}
     </div>`;
 }
@@ -3094,14 +3084,14 @@ async function loadGallery() {
       const p=d.data();
       const card=document.createElement('div');
       card.className='gallery-admin-item';
-      card.innerHTML=`<img src="${p.url}" alt="${p.caption||''}" loading="lazy" />
+      card.innerHTML=`<img src="${attrUrl(p.url)}" alt="${escapeHtml(p.caption||'')}" loading="lazy" />
         <div class="item-info">
-          <div style="font-weight:700;font-size:0.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.caption||'No caption'}</div>
+          <div style="font-weight:700;font-size:0.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(p.caption||'No caption')}</div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.4rem;">
-            <span class="${p.visibility==='public'?'badge-live':'badge-past'}" style="font-size:0.62rem;">${p.visibility?.toUpperCase()||'PUBLIC'}</span>
+            <span class="${p.visibility==='public'?'badge-live':'badge-past'}" style="font-size:0.62rem;">${escapeHtml(p.visibility?.toUpperCase()||'PUBLIC')}</span>
           </div>
         </div>
-        <button class="delete-overlay" onclick="deletePhoto('${d.id}','${p.fileName||''}')" title="Delete"><i class="fa-solid fa-trash-can"></i></button>`;
+        <button class="delete-overlay" onclick="deletePhoto('${jsAttr(d.id)}','${jsAttr(p.fileName||'')}')" title="Delete"><i class="fa-solid fa-trash-can"></i></button>`;
       container.appendChild(card);
     });
   } catch(e) { container.innerHTML='<p style="color:red;grid-column:1/-1;text-align:center;padding:2rem;">Error loading gallery.</p>'; }
@@ -3139,11 +3129,11 @@ async function loadVideos() {
     snap.forEach(d=>{
       const v=d.data();
       list.innerHTML+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem;position:relative;">
-        <div style="font-weight:800;margin-bottom:0.25rem;">${v.title}</div>
-        <div style="font-size:0.75rem;color:var(--text-light);text-transform:uppercase;font-weight:700;margin-bottom:0.5rem;">${v.category||''}: ${v.speaker||''}</div>
-        ${v.description?`<div style="font-size:0.82rem;color:var(--text-mid);margin-bottom:0.75rem;">${v.description}</div>`:''}
-        <a href="${v.url}" target="_blank" rel="noopener" style="color:var(--orange);font-size:0.8rem;font-weight:700;">Watch on YouTube</a>
-        <button onclick="deleteVideo('${d.id}')" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:#ff5252;cursor:pointer;font-size:1rem;"><i class="fa-solid fa-trash-can"></i></button>
+        <div style="font-weight:800;margin-bottom:0.25rem;">${escapeHtml(v.title)}</div>
+        <div style="font-size:0.75rem;color:var(--text-light);text-transform:uppercase;font-weight:700;margin-bottom:0.5rem;">${escapeHtml(v.category||'')}: ${escapeHtml(v.speaker||'')}</div>
+        ${v.description?`<div style="font-size:0.82rem;color:var(--text-mid);margin-bottom:0.75rem;">${escapeHtml(v.description)}</div>`:''}
+        <a href="${attrUrl(v.url)}" target="_blank" rel="noopener" style="color:var(--orange);font-size:0.8rem;font-weight:700;">Watch on YouTube</a>
+        <button onclick="deleteVideo('${jsAttr(d.id)}')" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:#ff5252;cursor:pointer;font-size:1rem;"><i class="fa-solid fa-trash-can"></i></button>
       </div>`;
     });
   } catch(e) { list.innerHTML='<p style="color:var(--text-mid);padding:2rem;text-align:center;">Error loading videos.</p>'; }
@@ -3157,7 +3147,7 @@ window.deleteVideo = async (id) => {
 function populateNotifTargets() {
   const sel = document.getElementById('pnTarget');
   sel.innerHTML = '<option value="">-- Select Member --</option>' +
-    allUsers.map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
+    allUsers.map(u=>`<option value="${escapeHtml(u.id)}">${escapeHtml(u.name)}</option>`).join('');
 }
 
 window.sendCommonNotification = async () => {
@@ -3205,12 +3195,12 @@ async function loadSentNotifications() {
       if (n.createdAt) { try { dateStr=n.createdAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); } catch(_){} }
       list.innerHTML+=`<div style="padding:1rem 1.25rem;border-left:3px solid ${isPersonal?'var(--orange)':'var(--border)'};background:var(--surface2);border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
         <div>
-          <div style="font-weight:700;font-size:0.9rem;">${n.title}</div>
-          <div style="font-size:0.8rem;color:var(--text-mid);margin-top:0.2rem;">${n.body}</div>
-          ${isPersonal?`<div style="font-size:0.72rem;color:var(--orange);font-weight:700;margin-top:0.3rem;">Personal, to ${n.targetName||''} ${n.read?'(Read)':'(Unread)'}</div>`:'<div style="font-size:0.72rem;color:var(--text-light);font-weight:700;margin-top:0.3rem;">Broadcast</div>'}
+          <div style="font-weight:700;font-size:0.9rem;">${escapeHtml(n.title)}</div>
+          <div style="font-size:0.8rem;color:var(--text-mid);margin-top:0.2rem;">${escapeHtml(n.body)}</div>
+          ${isPersonal?`<div style="font-size:0.72rem;color:var(--orange);font-weight:700;margin-top:0.3rem;">Personal, to ${escapeHtml(n.targetName||'')} ${n.read?'(Read)':'(Unread)'}</div>`:'<div style="font-size:0.72rem;color:var(--text-light);font-weight:700;margin-top:0.3rem;">Broadcast</div>'}
           <div style="font-size:0.7rem;color:var(--text-light);margin-top:0.2rem;">${dateStr}</div>
         </div>
-        <button onclick="deleteNotif('${d.id}')" style="background:none;border:none;color:var(--text-light);cursor:pointer;flex-shrink:0;"><i class="fa-solid fa-trash-can" style="font-size:0.85rem;"></i></button>
+        <button onclick="deleteNotif('${jsAttr(d.id)}')" style="background:none;border:none;color:var(--text-light);cursor:pointer;flex-shrink:0;"><i class="fa-solid fa-trash-can" style="font-size:0.85rem;"></i></button>
       </div>`;
     });
   } catch(e) { list.innerHTML='<p style="color:var(--text-mid);">Could not load notifications.</p>'; }
@@ -3306,14 +3296,14 @@ async function loadVotingSessions() {
       if (s.createdAt) { try { dateStr=s.createdAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); } catch(_){} }
       list.innerHTML+=`<div style="padding:1.25rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
         <div>
-          <div style="font-weight:700;">${s.meetTitle}</div>
+          <div style="font-weight:700;">${escapeHtml(s.meetTitle)}</div>
           <div style="font-size:0.78rem;color:var(--text-light);">${dateStr}</div>
         </div>
         <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
           ${s.active?'<span class="badge-live">OPEN</span>':'<span class="badge-past">CLOSED</span>'}
-          <button class="btn-primary btn-sm" onclick="viewVoteResults('${sid}')"><i class="fa-solid fa-chart-bar"></i> Results</button>
-          ${s.active?`<button class="btn-outline btn-sm" onclick="closeVotingSession('${sid}')">Close Session</button>`:''}
-          <button class="btn-danger btn-sm" onclick="deleteVotingSession('${sid}')">Delete</button>
+          <button class="btn-primary btn-sm" onclick="viewVoteResults('${jsAttr(sid)}')"><i class="fa-solid fa-chart-bar"></i> Results</button>
+          ${s.active?`<button class="btn-outline btn-sm" onclick="closeVotingSession('${jsAttr(sid)}')">Close Session</button>`:''}
+          <button class="btn-danger btn-sm" onclick="deleteVotingSession('${jsAttr(sid)}')">Delete</button>
         </div>
       </div>`;
     });
@@ -3368,13 +3358,13 @@ window.viewVoteResults = async (sid) => {
     const sorted=Object.entries(tallies).sort((a,b)=>b[1]-a[1]);
     const topVotes=sorted[0]?.[1]||0;
     html+=`<div style="margin-bottom:1.5rem;">
-      <h4 style="margin-bottom:1rem;font-size:0.88rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-light);">${cat.label}</h4>
+      <h4 style="margin-bottom:1rem;font-size:0.88rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-light);">${escapeHtml(cat.label)}</h4>
       ${sorted.map(([name,count])=>{
         const pct=votes.length?Math.round(count/votes.length*100):0;
         const isWinner=count===topVotes&&count>0;
         return `<div style="margin-bottom:0.75rem;">
           <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
-            <span style="font-weight:${isWinner?'800':'600'};color:${isWinner?'var(--orange)':'var(--text)'};">${name}${isWinner?' (Top)':''}</span>
+            <span style="font-weight:${isWinner?'800':'600'};color:${isWinner?'var(--orange)':'var(--text)'};">${escapeHtml(name)}${isWinner?' (Top)':''}</span>
             <span style="font-weight:700;color:var(--text-mid);">${count} votes</span>
           </div>
           <div class="vote-result-bar"><div class="vote-result-fill" style="width:${pct}%;"></div></div>
@@ -3409,10 +3399,10 @@ document.getElementById('winnerConfirmButtons').innerHTML=winnerButtons.map((wb,
       );
     }
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem;">
-      <span style="font-weight:700;font-size:0.88rem;">${wb.category}: <span style="color:var(--orange);">${wb.winner}</span></span>
+      <span style="font-weight:700;font-size:0.88rem;">${escapeHtml(wb.category)}: <span style="color:var(--orange);">${escapeHtml(wb.winner)}</span></span>
       ${alreadyAwarded
         ? `<span style="display:inline-flex;align-items:center;gap:0.4rem;background:#4CAF50;color:#fff;padding:0.45rem 1rem;border-radius:8px;font-size:0.8rem;font-weight:700;opacity:0.75;"><i class="fa-solid fa-check"></i> Awarded</span>`
-        : `<button class="btn-success btn-sm" onclick="awardWinnerBadge('${wb.winnerUid||''}','${wb.winner}','${wb.category}','${wb.meetTitle}',this)"><i class="fa-solid fa-crown"></i> Award Badge</button>`
+        : `<button class="btn-success btn-sm" onclick="awardWinnerBadge('${jsAttr(wb.winnerUid||'')}','${jsAttr(wb.winner)}','${jsAttr(wb.category)}','${jsAttr(wb.meetTitle)}',this)"><i class="fa-solid fa-crown"></i> Award Badge</button>`
       }
     </div>`;
   }).join('');
@@ -3474,26 +3464,26 @@ window.selectPathway = async (key, btn) => {
     container.innerHTML=`
       <div style="margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <h3 style="margin:0;">${data.name||key}</h3>
+          <h3 style="margin:0;">${escapeHtml(data.name||key)}</h3>
           <p style="margin:0.3rem 0 0;font-size:0.85rem;color:var(--text-mid);">${projects.length} projects</p>
         </div>
-        <button class="btn-primary btn-sm" onclick="addNewProject('${key}')">+ Add Project</button>
+        <button class="btn-primary btn-sm" onclick="addNewProject('${jsAttr(key)}')">+ Add Project</button>
       </div>
       ${projects.map((p,i)=>{
         const name=typeof p==='string'?p:(p.name||`Project ${i+1}`);
         const guide=typeof p==='object'&&p.guideLink?p.guideLink:'';
         return `<div style="padding:1.1rem 1.25rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:0.6rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
           <div style="flex:1;">
-            <div style="font-weight:700;">${name}</div>
+            <div style="font-weight:700;">${escapeHtml(name)}</div>
             ${guide?`<div style="font-size:0.75rem;color:var(--orange);margin-top:0.2rem;"><i class="fa-solid fa-link"></i> Guide linked</div>`:'<div style="font-size:0.75rem;color:var(--text-light);margin-top:0.2rem;">No guide link</div>'}
           </div>
           <div style="display:flex;gap:0.5rem;">
-            <button class="btn-outline btn-sm" onclick="editProject('${key}',${i})"><i class="fa-solid fa-pen"></i> Edit</button>
-            <button class="btn-danger btn-sm" onclick="deleteProject('${key}',${i})">Delete</button>
+            <button class="btn-outline btn-sm" onclick="editProject('${jsAttr(key)}',${i})"><i class="fa-solid fa-pen"></i> Edit</button>
+            <button class="btn-danger btn-sm" onclick="deleteProject('${jsAttr(key)}',${i})">Delete</button>
           </div>
         </div>`;
       }).join('')}`;
-  } catch(e) { container.innerHTML=`<p style="color:red;">Error: ${e.message}</p>`; }
+  } catch(e) { container.innerHTML=`<p style="color:red;">Error: ${escapeHtml(e.message)}</p>`; }
 };
 
 window.editProject = (key, idx) => {
@@ -3590,7 +3580,7 @@ async function loadRoleGuides() {
   container.innerHTML = ROLE_GUIDE_KEYS.map(r => `
     <div>
       <label class="form-label">${r.label}</label>
-      <input type="url" id="rg_${r.id}" value="${existing[r.id]||''}"
+      <input type="url" id="rg_${escapeHtml(r.id)}" value="${escapeHtml(existing[r.id]||'')}"
         placeholder="https://drive.google.com/..."
         style="font-size:0.82rem;" />
     </div>`).join('');
@@ -3644,7 +3634,7 @@ async function loadDocs() {
     snap.forEach(d => allDocsCache.push({ id: d.id, ...d.data() }));
     renderDocs(allDocsCache);
   } catch(e) {
-    if (container) container.innerHTML = `<div class="card"><p style="color:var(--text-mid);">Could not load documents: ${e.message}</p></div>`;
+    if (container) container.innerHTML = `<div class="card"><p style="color:var(--text-mid);">Could not load documents: ${escapeHtml(e.message)}</p></div>`;
   }
 }
 
@@ -3670,11 +3660,11 @@ function renderDocs(docs) {
       } catch(_) {}
     }
     const linksHtml = (d.links || []).filter(l => l.url).map(l =>
-      `<a href="${l.url}" target="_blank" rel="noopener"
+      `<a href="${attrUrl(l.url)}" target="_blank" rel="noopener"
         style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.85rem;background:var(--orange-light);color:var(--orange);border:1px solid rgba(255,87,34,0.2);border-radius:100px;font-size:0.78rem;font-weight:700;text-decoration:none;transition:all 0.2s;"
         onmouseover="this.style.background='var(--orange)';this.style.color='#fff'"
         onmouseout="this.style.background='var(--orange-light)';this.style.color='var(--orange)'">
-        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i>${l.name || l.url}
+        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i>${escapeHtml(l.name || l.url)}
       </a>`
     ).join('');
 
@@ -3683,17 +3673,17 @@ function renderDocs(docs) {
         <div style="flex:1;">
           <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.3rem;">
             ${starred ? '<i class="fa-solid fa-star" style="color:#f59e0b;font-size:0.95rem;"></i>' : ''}
-            <h3 style="margin:0;font-size:1.15rem;font-family:var(--font-display);">${d.title || 'Untitled'}</h3>
+            <h3 style="margin:0;font-size:1.15rem;font-family:var(--font-display);">${escapeHtml(d.title || 'Untitled')}</h3>
           </div>
           ${dateStr ? `<div style="font-size:0.75rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.08em;">${dateStr}</div>` : ''}
         </div>
         <div style="display:flex;gap:0.5rem;flex-shrink:0;">
-          <button onclick="editDoc('${d.id}')" class="btn-outline btn-sm">
+          <button onclick="editDoc('${jsAttr(d.id)}')" class="btn-outline btn-sm">
             <i class="fa-solid fa-pen"></i> Edit
           </button>
         </div>
       </div>
-      ${d.description ? `<p style="font-size:0.88rem;color:var(--text-mid);line-height:1.65;margin-bottom:${linksHtml?'1.1rem':'0'};">${d.description.replace(/\n/g,'<br>')}</p>` : ''}
+      ${d.description ? `<p style="font-size:0.88rem;color:var(--text-mid);line-height:1.65;margin-bottom:${linksHtml?'1.1rem':'0'};">${escapeHtml(d.description).replace(/\n/g,'<br>')}</p>` : ''}
       ${linksHtml ? `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${linksHtml}</div>` : ''}
     </div>`;
   }).join('');
@@ -3767,8 +3757,8 @@ window.editDoc = async function(id) {
       const row = document.createElement('div');
       row.style.cssText = 'display:flex;gap:0.5rem;align-items:center;';
       row.innerHTML = `
-        <input type="text" class="doc-link-name" value="${l.name||''}" placeholder="Link name" style="width:200px;flex-shrink:0;" />
-        <input type="url" class="doc-link-url" value="${l.url||''}" placeholder="https://..." style="flex:1;" />
+        <input type="text" class="doc-link-name" value="${escapeHtml(l.name||'')}" placeholder="Link name" style="width:200px;flex-shrink:0;" />
+        <input type="url" class="doc-link-url" value="${escapeHtml(l.url||'')}" placeholder="https://..." style="flex:1;" />
         <button type="button" onclick="this.parentElement.remove()"
           style="background:none;border:none;color:var(--text-light);cursor:pointer;font-size:1rem;padding:0.4rem;flex-shrink:0;">&times;</button>`;
       lc.appendChild(row);
