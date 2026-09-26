@@ -6,7 +6,7 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Speeches — Unscripted NITT</title>
+  <title>Speeches | Unscripted NITT</title>
   <meta name="description" content="Watch speech videos from Unscripted members at NIT Trichy." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -186,7 +186,7 @@ function renderVideos(videos) {
         ${v.speaker ? `<div style="font-size:0.82rem;font-weight:700;color:var(--orange);margin-bottom:0.4rem;">by ${v.speaker}</div>` : ''}
         ${v.description ? `<div class="video-desc">${v.description}</div>` : ''}
         ${dateStr ? `<div class="video-meta">${dateStr}</div>` : ''}
-        ${v.url && !ytId ? `<a href="${v.url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;margin-top:0.75rem;color:var(--orange);font-weight:700;font-size:0.85rem;">Watch externally &rarr;</a>` : ''}
+        ${v.url && !ytId ? `<a href="${v.url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;margin-top:0.75rem;color:var(--orange);font-weight:700;font-size:0.85rem;">Watch externally</a>` : ''}
       </div>
     </div>`;
   }).join('');
