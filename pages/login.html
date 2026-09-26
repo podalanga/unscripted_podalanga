@@ -6,7 +6,7 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login — Unscripted NITT</title>
+  <title>Login | Unscripted NITT</title>
   <meta name="description" content="Member login for Unscripted NIT Trichy. Sign in with your NITT webmail." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -210,7 +210,7 @@
           <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
         </div>
 
-        <button type="submit" class="btn-primary login-btn" id="loginBtn">Log In to Dashboard &rarr;</button>
+        <button type="submit" class="btn-primary login-btn" id="loginBtn">Log In to Dashboard</button>
         <div class="error-msg" id="errorMsg" role="alert"></div>
       </form>
 
@@ -238,7 +238,7 @@
   </div>
   <button type="submit" class="btn-primary" id="guestLoginBtn"
     style="width:100%;padding:0.9rem;border-radius:100px;margin-top:0.25rem;">
-    Enter as Guest →
+    Enter as Guest
   </button>
   <div id="guestLoginError" role="alert"
     style="display:none;margin-top:0.75rem;padding:0.75rem;background:rgba(244,67,54,0.08);
@@ -307,7 +307,7 @@ window.loginAsGuest = async function() {
       guestFlowActive = false;
       err.textContent = 'Invalid OTP. Please check with the admin.';
       err.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'Enter as Guest →';
+      btn.disabled = false; btn.textContent = 'Enter as Guest';
       return;
     }
 
@@ -322,7 +322,7 @@ window.loginAsGuest = async function() {
       guestFlowActive = false;
       err.textContent = 'This OTP has expired. Ask the admin for a new one.';
       err.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'Enter as Guest →';
+      btn.disabled = false; btn.textContent = 'Enter as Guest';
       return;
     }
 
@@ -340,7 +340,7 @@ window.loginAsGuest = async function() {
     guestFlowActive = false;
     err.textContent = 'Login failed: please try again.';
     err.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Enter as Guest →';
+    btn.disabled = false; btn.textContent = 'Enter as Guest';
   }
 };
 import { auth, db } from '../js/firebase-config.js';
@@ -398,12 +398,12 @@ window.switchLogin = function(mode) {
     tabA.classList.add('active');   tabM.classList.remove('active');
     title.textContent = 'Admin Portal';
     sub.textContent   = 'Authorized access only. Use your verified administrator credentials.';
-    btn.innerHTML     = 'Enter Admin Portal &rarr;';
+    btn.innerHTML     = 'Enter Admin Portal';
   } else {
     tabM.classList.add('active');   tabA.classList.remove('active');
     title.textContent = 'Welcome Back';
     sub.textContent   = 'Sign in with your NIT Trichy webmail to access your member dashboard and progress.';
-    btn.innerHTML     = 'Log In to Dashboard &rarr;';
+    btn.innerHTML     = 'Log In to Dashboard';
   }
 };
 
@@ -466,7 +466,7 @@ window.doLogin = async function() {
     err.textContent = msgs[e.code] || 'Login failed. Check your credentials.';
     err.style.display = 'block';
   } finally {
-    btn.innerHTML = currentMode === 'admin' ? 'Enter Admin Portal &rarr;' : 'Log In to Dashboard &rarr;';
+    btn.innerHTML = currentMode === 'admin' ? 'Enter Admin Portal' : 'Log In to Dashboard';
     btn.disabled  = false;
   }
 };

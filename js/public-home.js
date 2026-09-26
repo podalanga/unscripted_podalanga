@@ -51,7 +51,7 @@ async function loadEventsPreview() {
       snap.forEach(doc => {
         const e = doc.data();
         if (resolveEventType(e) !== 'upcoming') return;
-        let dateStr = '—';
+        let dateStr = '-';
         if (e.date) {
           try {
             const d = e.date.toDate ? e.date.toDate() : new Date(e.date);
