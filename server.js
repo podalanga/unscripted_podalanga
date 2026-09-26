@@ -41,6 +41,6 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🎤 Unscripted Server Live at: http://localhost:${PORT}`);
+  console.log(`Unscripted Server Live at: http://localhost:${PORT}`);
   console.log(`Press Ctrl+C to stop the server.`);
 });

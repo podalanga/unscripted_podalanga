@@ -3246,7 +3246,7 @@ function renderChatMessages(scrollToBottom) {
   // node, which by itself resets scrollTop to 0 — previously nothing
   // restored it unless wasNearBottom was true. That's what made opening the
   // reaction picker (or a reaction chip's names dropdown) on a message
-  // inside a collapsed day fold "jump to the top": every click on 😊 (or a
+  // inside a collapsed day fold "jump to the top": every click on the emoji button (or a
   // chip) calls renderChatMessages(false) to redraw the picker, the fold's
   // open state is preserved (see chatOpenFolds below) so the message stayed
   // visible, but at a completely different on-screen Y position. The user's
@@ -3453,7 +3453,7 @@ function chatRenderText(msg) {
 // Aggregates the { uid: {emoji,name} } reaction map into emoji chips with
 // counts (req 2), highlighting the one the current user picked. Clicking a
 // chip opens a small dropdown listing who reacted with that emoji, rather
-// than reacting — reacting/un-reacting stays on the 😊 picker button so the
+// than reacting — reacting/un-reacting stays on the emoji picker button so the
 // two actions (react vs. see who reacted) don't fight over the same click.
 function chatBuildReactionsHtml(msg) {
   if (!msg.reactions) return '';
