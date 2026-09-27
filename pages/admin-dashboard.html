@@ -85,7 +85,7 @@
     <button class="hamburger-admin" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
     <!-- req 12: same logo as other pages, working home link -->
     <a href="../index.html" class="nav-logo" style="display:flex;align-items:center;">
-      <img src="../icons/logo.png" alt="Unscripted" style="height:42px;width:auto;" />
+      <img src="../icons/logo-sm.png" alt="Unscripted" style="height:42px;width:auto;" />
     </a>
     <span style="font-size:0.72rem;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-light);border-left:1px solid var(--border);padding-left:1rem;display:none;" id="adminLabel">ADMIN COMMAND</span>
   </div>
@@ -1350,6 +1350,7 @@ import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https:/
 import {
   runDualApprovalAction, requestOrApproveServerAction, watchPendingActions, tripleConfirm, resetSettingsDoc
 } from '../js/danger-actions.js';
+import { compressImage } from '../js/image-compress.js';
 import { normalizeEvent, resolveEventType } from '../js/event-status.js';
 import { escapeHtml, safeUrl, attrUrl, jsAttr } from '../js/escape.js';
 
@@ -2222,12 +2223,13 @@ window.previewMemberPhoto = function(input) {
 
 window.uploadMemberPhoto = async function() {
   const uid = document.getElementById('photoMemberSelect').value;
-  const file = document.getElementById('memberPhotoFile').files[0];
+  let file = document.getElementById('memberPhotoFile').files[0];
   const status = document.getElementById('memberPhotoStatus');
   const progressWrap = document.getElementById('memberPhotoProgress');
   const progressBar = document.getElementById('memberPhotoProgressBar');
   if (!uid||!file) { alert('Select a member and a photo file.'); return; }
   progressWrap.style.display='block';
+  file = await compressImage(file, { maxSize: 512 });
   const storageRef = ref(storage, `avatars/${uid}`);
   const task = uploadBytesResumable(storageRef, file);
   task.on('state_changed',
@@ -3051,11 +3053,11 @@ window.uploadToGallery = async () => {
   const visibility=document.getElementById('galVisibility').value;
   const btn=document.getElementById('uploadGalBtn');
   if (!fileInput.files[0]) { alert('Select an image.'); return; }
-  const file=fileInput.files[0];
+  btn.disabled=true;
+  const file=await compressImage(fileInput.files[0], { maxSize: 1600 });
   const fileName=Date.now()+'_'+file.name;
   const storageRef=ref(storage,'gallery/'+fileName);
   const task=uploadBytesResumable(storageRef,file);
-  btn.disabled=true;
   document.getElementById('galUploadProgress').style.display='block';
   task.on('state_changed',
     snap=>document.getElementById('galProgressBar').style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%',

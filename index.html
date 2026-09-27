@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/preloader.css" />
+  <link rel="preload" as="image" href="icons/us-1920.webp" type="image/webp" media="(min-width: 769px)" />
   <link rel="stylesheet" href="css/theme-toggle.css" />
   <link rel="stylesheet" href="css/gooey-nav.css" />
   <link rel="stylesheet" href="css/stack-gallery.css" />
@@ -45,7 +46,7 @@
 
 <!-- NAV -->
 <nav class="navbar" id="navbar">
-  <a class="nav-logo" href="index.html"><img src="icons/logo.png" alt="Unscripted NITT" /></a>
+  <a class="nav-logo" href="index.html"><img src="icons/logo-sm.png" alt="Unscripted NITT" /></a>
   <div class="nav-links gooey-nav-container" id="navLinks">
     <nav>
       <ul>
@@ -76,7 +77,7 @@
 <!-- HERO -->
 <section class="hero" aria-label="Welcome">
   <div class="hero-bg">
-    <img src="icons/logo.png" class="hero-watermark" alt="" aria-hidden="true" />
+    <img src="icons/logo-sm.png" class="hero-watermark" alt="" aria-hidden="true" />
     <div class="hero-blob blob1"></div>
     <div class="hero-blob blob2"></div>
     <div class="hero-blob blob3"></div>
@@ -97,7 +98,8 @@
       <p class="hero-mobile-eyebrow">Official Public Speaking &amp; Leadership Club, NIT Trichy</p>
       <h1 class="hero-mobile-title hero-title-focus" id="heroTrueFocusMobile"></h1>
       <div class="hero-mobile-photo">
-        <img src="icons/us.jpg" alt="Unscripted members at a club meet" />
+        <!-- lazy: this block is display:none on desktop, so desktop never downloads it -->
+        <img src="icons/us-960.webp" width="960" height="435" loading="lazy" decoding="async" alt="Unscripted members at a club meet" />
       </div>
       <p class="hero-mobile-sub">Your spotlight starts here.</p>
     </div>
@@ -255,7 +257,7 @@
   <div class="footer-inner">
     <div class="footer-top">
       <div class="footer-brand">
-        <div class="footer-logo"><img src="icons/logo.png" alt="Unscripted" /></div>
+        <div class="footer-logo"><img src="icons/logo-sm.png" alt="Unscripted" /></div>
         <p class="footer-tagline">Official Public Speaking and Leadership Club of NIT Trichy.</p>
       </div>
       <div class="footer-nav">

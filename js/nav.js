@@ -68,7 +68,7 @@ function animateCounters() {
   });
 }
 
-// The "UNSCRIPTED" preloader covers the page for >= 5s. On phones the stats
+// The "UNSCRIPTED" preloader covers the page briefly. On phones the stats
 // strip is already on screen at load, so without this the count-up would run
 // (and finish) invisibly behind the overlay. Resolves as the overlay starts
 // fading out (or right away if there is none).

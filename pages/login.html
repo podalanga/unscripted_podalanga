@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/preloader.css" />
   <link rel="stylesheet" href="../css/theme-toggle.css" />
   <link rel="stylesheet" href="../css/mobile.css" />
   <link rel="icon" href="../icons/favicon.png" type="image/png" />
@@ -148,7 +149,8 @@
   </style>
 </head>
 <body>
-
+<div id="app-preloader" data-preloader="short" aria-hidden="true"><div class="preloader-text">UNSCRIPTED</div></div>
+<script type="module" src="../js/preloader.js"></script>
 
 <!-- Theme toggle (unified — same button/system as every other page) -->
 <button id="themeToggleBtn" class="theme-toggle-btn theme-toggle-btn--floating" type="button" aria-label="Toggle theme">
@@ -160,7 +162,7 @@
   <!-- LEFT PANEL -->
   <div class="login-panel-left">
     <div class="left-content">
-      <img src="../icons/logo.png" alt="Unscripted NITT" class="left-logo" />
+      <img src="../icons/logo-sm.png" alt="Unscripted NITT" class="left-logo" />
       <h1 class="left-title">Excellence,<br><em>In All,</em><br>Through Fun.</h1>
       <p class="left-sub">The official public speaking and leadership club of NIT Trichy.</p>
       <div class="left-stats">
@@ -188,7 +190,7 @@
 
       <!-- Mobile logo -->
       <div style="text-align:center;margin-bottom:2rem;display:none;" class="mobile-logo-wrap">
-        <img src="../icons/logo.png" alt="Unscripted NITT" style="height:56px;margin:0 auto;" />
+        <img src="../icons/logo-sm.png" alt="Unscripted NITT" style="height:56px;margin:0 auto;" />
       </div>
 
       <!-- Tabs -->
@@ -367,12 +369,6 @@ onAuthStateChanged(auth, async (user) => {
   } catch(e) { /* ignore */ }
 });
 
-// Check URL params for admin mode
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('type') === 'admin') {
-  switchLogin('admin');
-}
-
 // ── TAB SWITCH ─────────────────────────────────────────────
 let currentMode = 'member';
 
@@ -396,6 +392,12 @@ window.switchLogin = function(mode) {
     btn.innerHTML     = 'Log In to Dashboard';
   }
 };
+
+// Check URL params for admin mode (after switchLogin is defined)
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('type') === 'admin') {
+  switchLogin('admin');
+}
 
 // ── LOGIN ──────────────────────────────────────────────────
 window.doLogin = async function() {
